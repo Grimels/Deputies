@@ -1,0 +1,119 @@
+﻿@model List<ParliamentaryInquiry.Core.Entities.DeputyAssociation>
+
+@{
+    ViewBag.Title = "Проблематика запитiв";
+}
+<script src="~/Content/Chart.bundle.min.js"></script>
+<script src="~/Content/utils.js"></script>
+
+<div class="deps-buttons-wrapper">
+    <a href="@Url.Action("InquriesBySessions", "Analytics")" class="btn btn-primary dep-header-button"><img class="btn-icon" src="~/Images/nav-icons/analitics/inquries.png"> Кiлькiсть запитiв по сесiям</a>
+    <a href="@Url.Action("Deputies", "Analytics")" class="btn btn-primary dep-header-button"><img class="btn-icon" src="~/Images/nav-icons/analitics/deputies.png"> Рейтинг депутатiв</a>
+    <a href="@Url.Action("Associations", "Analytics")" class="btn btn-primary dep-header-button"><img class="btn-icon" src="~/Images/nav-icons/analitics/fractions.png"> Рейтинг фракцiй</a>
+    <a href="@Url.Action("Problems", "Analytics")" class="active btn btn-primary dep-header-button"><img class="btn-icon" src="~/Images/nav-icons/analitics/problems.png"> Проблематика запитiв</a>
+    <a href="@Url.Action("Organizations", "Analytics")" class="btn btn-primary dep-header-button"><img class="btn-icon" src="~/Images/nav-icons/analitics/organisations.png"> Органiзацiї з найбiльшою кiлькiстью звернень</a>
+</div>
+<h2>Проблематика запитiв</h2>
+<div class="row">
+    <div class="col-xs-12 col-sm-12 col-md-3 col-lg-3">
+        <div class="panel panel-primary">
+            <div class="panel-body">
+                <div id="associations">
+                    <div id="associationsBlock">
+                        @for (var i = 0; i < Model.Count; i++)
+                        {
+                            <div class="checkbox">
+                                <label>
+                                    @Html.HiddenFor(m => m[i].Id, new { @Value = Model[i].Id })
+                                    <input type="checkbox"> @Model[i].Name
+                                </label>
+                            </div>
+                        }
+                    </div>
+                </div>
+                <a id="submit" style="width: 100%;" class="btn btn-primary">Фiльтрувати</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-xs-12 col-sm-12 col-md-9 col-lg-9">
+        <div id="loader" class="loader"></div>
+        <div id="wrapper" style="width:80%; margin: 0 auto 20px auto; display: none;">
+            <canvas id="chart-area" />
+        </div>
+
+    </div>
+</div>
+
+<script>
+    $(function () {
+
+        var config = {
+            type: 'pie',
+            data: {
+                datasets: [],
+                labels: []
+            },
+            options: {
+                responsive: true,
+                tooltips: {
+                    mode: 'label',
+                    callbacks: {
+                        label: function (tooltipItem, data) {
+                            var label = data.labels[tooltipItem.index];
+                            var val = data.datasets[tooltipItem.datasetIndex].data[tooltipItem.index];
+                            var all = data.datasets[tooltipItem.datasetIndex].data.reduce(function(a,b) {return a+b;}, 0);
+                            return label + ': ' + val + ' (' + ((val / all) * 100).toFixed(2) + '%)';
+                        }
+                    }
+                }
+            }
+        };
+
+        var ctx = document.getElementById("chart-area").getContext("2d");
+        window.myPie = new Chart(ctx, config);
+
+        function buildChart(queryString) {
+            $('#wrapper').hide();
+            $('#loader').show();
+            $.get('/Analytics/ProblemsData?' + queryString, function (resp) {
+
+                var colorNames = Object.keys(window.chartColors);
+                var colors = [];
+                for (var i in resp) {
+                    var colorName = colorNames[i % colorNames.length];
+                    var dsColor = window.chartColors[colorName];
+                    colors.push(dsColor);
+                }
+
+                config.data.datasets = [{
+                    data: resp.map(function (x) { return x.Count; }),
+                    backgroundColor: colors,
+                    label: 'Dataset 1'
+                }];
+
+                config.data.labels = resp.map(function (x) { return x.Name; });
+
+                window.myPie.update();
+
+                $('#wrapper').show();
+                $('#loader').hide();
+            });
+        }
+
+        buildChart('');
+
+        $('#submit').click(function () {
+            var queryString = '';
+            var checked = $('#associationsBlock').find('input:checked');
+            if (checked.length !== 0) {
+                checked.each(function (index) {
+                    queryString += 'a=' + $($(checked[index]).siblings()[0]).val() + '&';
+                });
+            }
+
+            buildChart(queryString);
+        });
+    })
+
+
+</script>

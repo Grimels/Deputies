@@ -1,0 +1,62 @@
+﻿@model Deputies.BLL.Features.Analitics.Models.OrganizationsResponse
+@{
+    ViewBag.Title = "Органiзацiї з найбiльшою кiлькiстью звернень";
+}
+<div class="deps-buttons-wrapper">
+    <a href="@Url.Action("InquriesBySessions", "Analytics")" class="btn btn-primary dep-header-button"><img class="btn-icon" src="~/Images/nav-icons/analitics/inquries.png"> Кiлькiсть запитiв по сесiям</a>
+    <a href="@Url.Action("Deputies", "Analytics")" class="btn btn-primary dep-header-button"><img class="btn-icon" src="~/Images/nav-icons/analitics/deputies.png"> Рейтинг депутатiв</a>
+    <a href="@Url.Action("Associations", "Analytics")" class="btn btn-primary dep-header-button"><img class="btn-icon" src="~/Images/nav-icons/analitics/fractions.png"> Рейтинг фракцiй</a>
+    <a href="@Url.Action("Problems", "Analytics")" class="btn btn-primary dep-header-button"><img class="btn-icon" src="~/Images/nav-icons/analitics/problems.png"> Проблематика запитiв</a>
+    <a href="@Url.Action("Organizations", "Analytics")" class="active btn btn-primary dep-header-button"><img class="btn-icon" src="~/Images/nav-icons/analitics/organisations.png"> Органiзацiї з найбiльшою кiлькiстью звернень</a>
+</div>
+<h2>Органiзацiї з найбiльшою кiлькiстью звернень</h2>
+<table class="table table-striped table-hover ">
+    <thead>
+        <tr>
+            <th>№</th>
+            <th>Органiзацiя</th>
+            <th>Запитiв</th>
+        </tr>
+    </thead>
+    <tbody>
+        @for (var i = 0; i < Model.Items.Count; i++)
+        {
+            <tr>
+                <td>@((Model.PagingModel.Current - 1) * 20 + i + 1)</td>
+                <td>@Model.Items[i].Name</td>
+                <td><a href="@Url.Action("Filter", "Home", new { query = @Model.Items[i].Name })">@Model.Items[i].Count</a></td>
+            </tr>
+        }
+
+    </tbody>
+</table>
+<ul class="pagination" id="pagination"></ul>
+
+
+<script>
+ $(function () {
+        var host = location.protocol + '//' + location.host;
+
+        window.pagObj = $('#pagination').twbsPagination({
+            totalPages: +'@Model.PagingModel.Total',
+            visiblePages: 5,
+            startPage: +'@Model.PagingModel.Current',
+            onPageClick: function (event, page) {
+                console.info(page + ' (from options)');
+            }
+        }).on('page', function (event, page) {
+            window.location.href = updateQueryStringParameter(window.location.href, 'page', page);
+        });
+    });
+
+    function updateQueryStringParameter(uri, key, value) {
+        var re = new RegExp("([?&])" + key + "=.*?(&|$)", "i");
+        var separator = uri.indexOf('?') !== -1 ? "&" : "?";
+        if (uri.match(re)) {
+            return uri.replace(re, '$1' + key + "=" + value + '$2');
+        }
+        else {
+            return uri + separator + key + "=" + value;
+        }
+    }
+</script>

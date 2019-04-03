@@ -1,0 +1,194 @@
+﻿@model  Deputies.BLL.Features.Analitics.Models.DeputyRating
+@{
+    ViewBag.Title = "Рейтинг депутатiв";
+}
+
+<div class="deps-buttons-wrapper">
+    <a href="@Url.Action("InquriesBySessions", "Analytics")" class="btn btn-primary dep-header-button"><img class="btn-icon" src="~/Images/nav-icons/analitics/inquries.png"> Кiлькiсть запитiв по сесiям</a>
+    <a href="@Url.Action("Deputies", "Analytics")" class="active btn btn-primary dep-header-button"><img class="btn-icon" src="~/Images/nav-icons/analitics/deputies.png"> Рейтинг депутатiв</a>
+    <a href="@Url.Action("Associations", "Analytics")" class="btn btn-primary dep-header-button"><img class="btn-icon" src="~/Images/nav-icons/analitics/fractions.png"> Рейтинг фракцiй</a>
+    <a href="@Url.Action("Problems", "Analytics")" class="btn btn-primary dep-header-button"><img class="btn-icon" src="~/Images/nav-icons/analitics/problems.png"> Проблематика запитiв</a>
+    <a href="@Url.Action("Organizations", "Analytics")" class="btn btn-primary dep-header-button"><img class="btn-icon" src="~/Images/nav-icons/analitics/organisations.png"> Органiзацiї з найбiльшою кiлькiстью звернень</a>
+</div>
+<h2>Рейтинг депутатів</h2>
+<div style="margin-top: 20px;" class="btn-group btn-group-justified">
+    <a style="white-space: normal;" href="@Url.Action("Deputies", "Analytics")" class="btn @(Model.Deps == "all" ? "btn-primary" : "btn-default") ">Усi</a>
+    <a style="white-space: normal;" href="@Url.Action("Deputies", "Analytics", new { deps = "single" })" class="btn @(Model.Deps == "single" ? "btn-primary" : "btn-default")">Обрані по одномандатних округах</a>
+    <a style="white-space: normal;" href="@Url.Action("Deputies", "Analytics", new { deps = "party" })" class="btn @(Model.Deps == "party" ? "btn-primary" : "btn-default")">Обрані за партійними списками</a>
+</div>
+<div class="row" style="margin-top: 20px;">
+    <div class="col-xs-12 col-sm-12 col-md-3 col-lg-3">
+        <div class="panel panel-primary">
+            <div class="panel-body">
+                <div id="associations">
+                    <div id="associationsBlock">
+                        @for (var i = 0; i < Model.Associations.Count; i++)
+                        {
+                            <div class="checkbox">
+                                <label>
+                                    @Html.HiddenFor(m => m.Associations[i].Id, new { @Value = Model.Associations[i].Id })
+                                    @Html.CheckBoxFor(m => m.Associations[i].Checked) @Model.Associations[i].Label
+                                </label>
+                            </div>
+                        }
+                    </div>
+                </div>
+                <a id="submit" style="width: 100%;" class="btn btn-primary">Фiльтрувати</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-xs-12 col-sm-12 col-md-9 col-lg-9">
+        <table class="table table-striped table-hover ">
+            <thead>
+                <tr>
+                    <th>№</th>
+                    <th>Депутат</th>
+                    <th>Фракцiя</th>
+                    <th>Запитiв</th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (var i = 0; i < Model.Items.Count; i++)
+                {
+                    <tr>
+                        <td>@((Model.PagingModel.Current - 1) * 10 + i + 1)</td>
+                        <td>
+                            <a style="float: left; margin-right: 10px;" href="@Url.Action("Deputy", "Home", new {deputyId = @Model.Items[i].Deputy.Id})"><img style="width: 80px;" class="img-responsive img-thumbnail" src="@Model.Items[i].Deputy.PhotoLink" /></a>
+                            <p><b><a href="@Url.Action("Deputy", "Home", new {deputyId = @Model.Items[i].Deputy.Id})">@Model.Items[i].Deputy.Name</a></b></p>
+                        </td>
+                        <td style="vertical-align:middle;">
+
+                            <a style="float: left; margin-right: 10px;" href="@Url.Action("ByAssociation", "Deputy", new { associationId = Model.Items[i].Deputy.AssociationId })">
+                                <img style="width: 80px;" class="img-responsive img-thumbnail" src="~/Content/img/associations/@(Model.Items[i].Deputy.Association).jpg" />
+                            </a>
+                            <p><b><a href="@Url.Action("ByAssociation", "Deputy", new { associationId = Model.Items[i].Deputy.AssociationId })">@Model.Items[i].Deputy.Association</a></b></p>
+                        </td>
+                        <td style="width: 30%; vertical-align:middle;">
+                            @if (Model.Items[i].IndividualInquries != 0 || Model.Items[i].CollectiveInquries != 0)
+                            {
+                                <div class="progress" style="margin: 0; height: 27px;">
+                                    @if (Model.Items[i].IndividualInquries != 0)
+                                    {
+                                        <div class="progress-bar progress-bar-primary" style="width: @(Model.Items[i].IndividualInquries * 100 / (Model.Items[i].IndividualInquries + Model.Items[i].CollectiveInquries))%" data-toggle="tooltip" data-placement="top" title="" data-original-title="Iндивiдуальнi: @Model.Items[i].IndividualInquries">@Model.Items[i].IndividualInquries</div>
+                                    }
+
+                                    @if (Model.Items[i].CollectiveInquries != 0)
+                                    {
+                                        <div class="progress-bar progress-bar-warning" style="0; width: @(Model.Items[i].CollectiveInquries * 100 / (Model.Items[i].IndividualInquries + Model.Items[i].CollectiveInquries))%" data-toggle="tooltip" data-placement="top" title="" data-original-title="Колективнi: @Model.Items[i].CollectiveInquries">@Model.Items[i].CollectiveInquries</div>
+                                    }
+                                </div>
+                            }
+                            else
+                            {
+                                <b>Запити вiдсутнi</b>
+                            }
+
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+        <ul class="pagination" id="pagination"></ul>
+    </div>
+</div>
+
+<script>
+            $('#submit').click(function () {
+                var queryString = '';
+                var checked = $('#associationsBlock').find('input:checked');
+                if (checked.length !== 0) {
+                    checked.each(function (index) {
+                        queryString += 'a=' + $($(checked[index]).siblings()[0]).val() + '&';
+                    });
+                }
+                debugger;
+                var index = window.location.href.indexOf('a=');
+                var newHref = window.location.href.substring(0, index != -1 ? (window.location.href[index - 1] === '?' ? index - 1 : index) : window.location.href.length);
+                window.location.href = newHref + ((newHref.indexOf('?') === -1) ? '?' : '&') + queryString;
+            });
+
+
+            function filterQueryString() {
+                var queryString = '';
+                var groups = $('#filter-form .list-group-item[id]');
+                // session
+                var checkedSessions = $(groups[0]).find('input:checked');
+                if (checkedSessions.length !== 0) {
+                    checkedSessions.each(function (index) {
+                        queryString += 's=' + $($(checkedSessions[index]).siblings()[0]).val() + '&';
+                    });
+                }
+
+                // done
+                var doneDiv = $(groups[1]).find('.checkbox')[0];
+                var done = $(doneDiv).find('input:checked');
+                if (done.length != 0) {
+                    queryString += 'done=true&';
+                }
+
+                // proc
+                var procDiv = $(groups[1]).find('.checkbox')[1];
+                var proc = $(procDiv).find('input:checked');
+                if (proc.length != 0) {
+                    queryString += 'proc=true&';
+                }
+
+                // ind
+                var indDiv = $(groups[2]).find('.checkbox')[0];
+                var ind = $(indDiv).find('input:checked');
+                if (ind.length != 0) {
+                    queryString += 'ind=true&';
+                }
+
+                // col
+                var colDiv = $(groups[2]).find('.checkbox')[1];
+                var col = $(colDiv).find('input:checked');
+                if (col.length != 0) {
+                    queryString += 'col=true&';
+                }
+
+                // fractions
+                var checkedFractions = $(groups[3]).find('input:checked');
+                if (checkedFractions.length !== 0) {
+                    checkedFractions.each(function (index) {
+                        queryString += 'f=' + $($(checkedFractions[index]).siblings()[0]).val() + '&';
+                    });
+                }
+
+                // problem
+                var checkedProblems = $(groups[4]).find('input:checked');
+                if (checkedProblems.length !== 0) {
+                    checkedProblems.each(function (index) {
+                        queryString += 'p=' + $($(checkedProblems[index]).siblings()[0]).val() + '&';
+                    });
+                }
+
+                return queryString;
+            }
+
+            $(function () {
+                var host = location.protocol + '//' + location.host;
+
+                window.pagObj = $('#pagination').twbsPagination({
+                    totalPages: +'@Model.PagingModel.Total',
+                    visiblePages: 5,
+                    startPage: +'@Model.PagingModel.Current',
+                    onPageClick: function (event, page) {
+                        console.info(page + ' (from options)');
+                    }
+                }).on('page', function (event, page) {
+                    window.location.href = updateQueryStringParameter(window.location.href, 'page', page);
+                });
+            });
+
+            function updateQueryStringParameter(uri, key, value) {
+                var re = new RegExp("([?&])" + key + "=.*?(&|$)", "i");
+                var separator = uri.indexOf('?') !== -1 ? "&" : "?";
+                if (uri.match(re)) {
+                    return uri.replace(re, '$1' + key + "=" + value + '$2');
+                }
+                else {
+                    return uri + separator + key + "=" + value;
+                }
+            }
+</script>

@@ -1,0 +1,410 @@
+﻿@model  Deputies.BLL.Features.Deputies.Models.DeputyInfoModel
+
+@{
+    ViewBag.Title = Model.DeputyModel.Name;
+}
+
+
+<script src="~/Content/Chart.bundle.min.js"></script>
+<script src="~/Content/utils.js"></script>
+
+<div class="panel panel-default" style="margin-top: 20px;">
+    <div class="panel-heading clearfix">
+        <div class="pull-left"><b>@Model.DeputyModel.Name</b></div>
+    </div>
+    <div class="panel-body">
+        <div class="row">
+            <div class="col-md-2">
+                <img style="display: block; margin: 0 auto;" class="img-responsive img-thumbnail" data-toggle="tooltip" data-placement="top" title="" data-original-title="Фото депутата" src="@Model.DeputyModel.PhotoLink" />
+            </div>
+            <div class="col-md-10">
+                @if (Model.DeputyModel.ChosenBy != null)
+                {
+                    <p><span class="glyphicon glyphicon-globe"></span> <b>Обраний по: </b>@Model.DeputyModel.ChosenBy</p>
+                }
+
+                @if (Model.DeputyModel.Party != null)
+                {
+                    <p><span class="glyphicon glyphicon-flag"></span> <b>Партія: </b>@Model.DeputyModel.Party</p>
+                }
+                @if (Model.DeputyModel.Association != null)
+                {
+                    <p><span class="glyphicon glyphicon-user"></span> <b>Фракція або група: </b>@Model.DeputyModel.Association</p>
+                }
+                @if (Model.DeputyModel.Position != null)
+                {
+                    <p>
+                        <span class="glyphicon glyphicon-briefcase"></span> <b>Посада: </b> @Model.DeputyModel.Position
+                    </p>
+                }
+
+
+                <p>
+                    <span class="glyphicon glyphicon-exclamation-sign"></span> <b>Стан депутатських повноважень: </b> @(Model.DeputyModel.IsActive ? "діючий" : "припиненый")
+                </p>
+
+                @if (Model.DeputyModel.Email != null)
+                {
+                    <p>
+                        <span class="glyphicon glyphicon-envelope"></span> <b>Електронна пошта: </b> <a href="mailto:@Model.DeputyModel.Email">@Model.DeputyModel.Email</a>
+                    </p>
+                }
+
+                @if (Model.DeputyModel.Link != null)
+                {
+                    <p>
+                        <span class="glyphicon glyphicon-home"></span> <b>Сторінка на сайті ВРУ: </b> <a href="@Model.DeputyModel.Link">@Model.DeputyModel.Link</a>
+                    </p>
+                }
+                <button style="margin-left: 10px;" data-toggle="modal" data-target="#myModal" class="btn btn-primary pull-right">Підписатися на оновлення</button>
+                <a style="margin-left: 10px;" href="@Url.Action("InquriesByDeputy", new {deputyId = Model.DeputyModel.Id})" class="btn btn-primary pull-right">Переглянути запити</a>
+                <a href="@Url.Action("BillsByDeputy", "Bills", new {deputyId = Model.DeputyModel.Id})" class="btn btn-primary pull-right">Переглянути законопроекти</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="myModalLabel">Підписатися на оновлення</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label class="control-label" for="focusedInput">E-Mail</label>
+                        <input class="form-control" id="email" type="email">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" data-dismiss="modal">Відміна</button>
+                    <button type="button" id="subscribe" class="btn btn-primary">Підписатися</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+</div>
+<h2>Аналiтика депутата</h2>
+<div id="loader" class="loader"></div>
+<div id="wrapper" style="display: none">
+    <hr />
+    <h3>Кiлькiсть запитiв по сесiям</h3>
+    <div style="margin: 20px auto;">
+        <canvas id="canvas"></canvas>
+    </div>
+    <hr />
+    <h3>Кiлькiсть законопроектiв по сесiям</h3>
+    <div style="margin: 20px auto;">
+        <canvas id="bills-canvas"></canvas>
+    </div>
+    <hr />
+    <h3>Рейтинг</h3>
+    <div class="row">
+        <div class="col-sm-12 col-xs-12 col-md-6 col-lg-6">
+            <div class="panel panel-default">
+                <div class="panel-heading"><b><span id="from-all-place"></span> мiсце</b> з <span id="from-all-count"></span> серед усіх депутатів</div>
+                <div class="panel-body">
+                    <canvas id="from-all"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-12 col-xs-12 col-md-6 col-lg-6">
+            <div class="panel panel-default">
+                <div class="panel-heading"><b><span id="from-fraction-place"></span> мiсце</b> з <span id="from-fraction-count"></span> серед депутатів власної фракції/групи</div>
+                <div class="panel-body">
+                    <canvas id="from-fraction"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-12 col-xs-12 col-md-6 col-lg-6">
+            <div class="panel panel-default">
+                <div class="panel-heading"><b><span id="from-same-place"></span> мiсце</b> з <span id="from-same-count"></span> серед депутатiв обраних <span id="from-same-title"></span></div>
+                <div class="panel-body">
+                    <canvas id="from-same"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    <hr />
+    <h3>Проблематика запитiв</h3>
+    <div style="margin: 20px auto; max-width: 700px;">
+        <canvas id="problems"></canvas>
+    </div>
+    <hr />
+    <h3>Рубрики законопроектів</h3>
+    <div style="margin: 20px auto; max-width: 700px;">
+        <canvas id="rubrics"></canvas>
+    </div>
+    <hr />
+    <h3>Органiзацiї з найбiльшою кiлькiстью звернень</h3>
+    <table class="table table-striped table-hover ">
+        <thead>
+            <tr>
+                <th>№</th>
+                <th>Органiзацiя</th>
+                <th>Запитiв</th>
+            </tr>
+        </thead>
+        <tbody>
+            @for (var i = 0; i < Model.Organizations.Count; i++)
+            {
+                <tr>
+                    <td>@(i + 1)</td>
+                    <td>@Model.Organizations[i].Name</td>
+                    <td><a href="@Url.Action("InquriesByDeputy", new {deputyId = Model.DeputyModel.Id, destinationName = @Model.Organizations[i].Name })">@Model.Organizations[i].Count</a></td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+<script>
+
+    $('#subscribe').click(function () {
+        $.post("/notifications/Subscribe", { email: $('#email').val(), deputyId: '@Model.DeputyModel.Id' })
+          .done(function (data) {
+              $('#myModal').modal('toggle');
+          });
+    })
+
+    window.onload = function () {
+
+        $.get('/Analytics/DeputyAnalitics?deputyId=@Model.DeputyModel.Id', function (resp) {
+            buldSession(resp);
+            buildBillsBySessions(resp);
+            buildRating(resp, 'from-all', 'FromAll');
+            $('#from-all-place').html(resp.FromAll.AditionalData);
+            $('#from-all-count').html(resp.FromAll.AditionalData1);
+            buildRating(resp, 'from-fraction', 'FromAssociation');
+            $('#from-fraction-place').html(resp.FromAssociation.AditionalData);
+            $('#from-fraction-count').html(resp.FromAssociation.AditionalData1);
+            buildRating(resp, 'from-same', 'FromSameSelected');
+            $('#from-same-place').html(resp.FromSameSelected.AditionalData);
+            $('#from-same-count').html(resp.FromSameSelected.AditionalData1);
+            $('#from-same-title').html(resp.IsSingle ? 'по одномандатних округах' : 'за партійними списками');
+            buildProblems(resp);
+            buildRubrics(resp);
+            $('#wrapper').show();
+            $('#loader').hide();
+        });
+    };
+
+    function buldSession(resp) {
+        var barChartData = {
+            labels: resp.Sessions.Labels,
+            datasets: [{
+                label: resp.Sessions.Data[0].Title,
+                backgroundColor: window.chartColors.blue,
+                data: resp.Sessions.Data[0].Data
+            }, {
+                label: resp.Sessions.Data[1].Title,
+                backgroundColor: window.chartColors.yellow,
+                data: resp.Sessions.Data[1].Data
+            }]
+
+        };
+
+        var ctx = document.getElementById("canvas").getContext("2d");
+        window.myBar = new Chart(ctx, {
+            type: 'bar',
+            data: barChartData,
+            options: {
+                title: {
+                    display: true,
+                    text: "Кiлькiсть запитiв по сесiям"
+                },
+                tooltips: {
+                    mode: 'label',
+                    intersect: false,
+                    callbacks: {
+                        label: function (tooltipItem, data) {
+                            var corporation = data.datasets[tooltipItem.datasetIndex].label;
+                            var valor = data.datasets[tooltipItem.datasetIndex].data[tooltipItem.index];
+
+                            // Loop through all datasets to get the actual total of the index
+                            var total = 0;
+                            for (var i = 0; i < data.datasets.length; i++)
+                                total += data.datasets[i].data[tooltipItem.index];
+
+                            // If it is not the last dataset, you display it as you usually do
+                            if (tooltipItem.datasetIndex != data.datasets.length - 1) {
+                                return corporation + " : " + valor;
+                            } else { // .. else, you display the dataset and the total, using an array
+                                return [corporation + " : " + valor, "Усього : " + total];
+                            }
+                        }
+                    }
+                },
+                responsive: true,
+                scales: {
+                    xAxes: [{
+                        stacked: true,
+                    }],
+                    yAxes: [{
+                        stacked: true
+                    }]
+                }
+            }
+        });
+    }
+
+    function buildRating(resp, selector, propName) {
+        var color = Chart.helpers.color;
+        var barChartData = {
+            labels: [''],
+            datasets: [{
+                label: resp[propName].Labels[0],
+                backgroundColor: window.chartColors.green,
+                data: resp[propName].Data[0].Data
+            }, {
+                backgroundColor: window.chartColors.yellow,
+                label: resp[propName].Labels[1],
+                data: resp[propName].Data[1].Data
+            }, {
+                backgroundColor: window.chartColors.blue,
+                label: resp[propName].Labels[2],
+                data: resp[propName].Data[2].Data
+            }]
+
+        };
+
+        var ctx = document.getElementById(selector).getContext("2d");
+        window[propName] = new Chart(ctx, {
+            type: 'bar',
+            data: barChartData,
+            options: {
+                responsive: true,
+                legend: {
+                    position: 'top',
+                }
+            }
+        });
+    }
+
+    function buildProblems(resp) {
+        var config = {
+            type: 'pie',
+            data: {
+                datasets: [],
+                labels: []
+            },
+            options: {
+                responsive: true,
+                tooltips: {
+                    mode: 'label',
+                    callbacks: {
+                        label: function (tooltipItem, data) {
+                            var label = data.labels[tooltipItem.index];
+                            var val = data.datasets[tooltipItem.datasetIndex].data[tooltipItem.index];
+                            var all = data.datasets[tooltipItem.datasetIndex].data.reduce(function (a, b) { return a + b; }, 0);
+                            return label + ': ' + val + ' (' + ((val / all) * 100).toFixed(2) + '%)';
+                        }
+                    }
+                }
+            }
+        };
+
+        var ctx = document.getElementById("problems").getContext("2d");
+        window.myPie = new Chart(ctx, config);
+
+        var colorNames = Object.keys(window.chartColors);
+        var colors = [];
+        for (var i in resp.Problems) {
+            var colorName = colorNames[i % colorNames.length];
+            var dsColor = window.chartColors[colorName];
+            colors.push(dsColor);
+        }
+
+        config.data.datasets = [{
+            data: resp.Problems.map(function (x) { return x.Count; }),
+            backgroundColor: colors,
+            label: 'Dataset 1'
+        }];
+
+        config.data.labels = resp.Problems.map(function (x) { return x.Name; });
+        window.myPie.update();
+    }
+
+    function buildRubrics(resp) {
+        var config = {
+            type: 'pie',
+            data: {
+                datasets: [],
+                labels: []
+            },
+            options: {
+                responsive: true,
+                tooltips: {
+                    mode: 'label',
+                    callbacks: {
+                        label: function (tooltipItem, data) {
+                            var label = data.labels[tooltipItem.index];
+                            var val = data.datasets[tooltipItem.datasetIndex].data[tooltipItem.index];
+                            var all = data.datasets[tooltipItem.datasetIndex].data.reduce(function (a, b) { return a + b; }, 0);
+                            return label + ': ' + val + ' (' + ((val / all) * 100).toFixed(2) + '%)';
+                        }
+                    }
+                }
+            }
+        };
+
+        var ctx = document.getElementById("rubrics").getContext("2d");
+        window.myPie = new Chart(ctx, config);
+
+        var colorNames = Object.keys(window.chartColors);
+        var colors = [];
+        for (var i in resp.Rubrics) {
+            var colorName = colorNames[i % colorNames.length];
+            var dsColor = window.chartColors[colorName];
+            colors.push(dsColor);
+        }
+
+        config.data.datasets = [{
+            data: resp.Rubrics.map(function (x) { return x.Count; }),
+            backgroundColor: colors,
+            label: 'Dataset 1'
+        }];
+
+        config.data.labels = resp.Rubrics.map(function (x) { return x.Name; });
+        window.myPie.update();
+    }
+
+    function buildBillsBySessions(resp) {
+        var barChartData = {
+            labels: resp.BillsBySessions.Labels,
+            datasets: []
+        };
+
+        var colorNames = ["blue", "yellow", "green", "red", "orange", "purple", "grey"];
+        for (var i = 0; i < 1; i++) {
+            var colorName = colorNames[i % colorNames.length];
+            barChartData.datasets.push({
+                label: resp.BillsBySessions.Data[i].Title,
+                backgroundColor: window.chartColors[colorName],
+                data: resp.BillsBySessions.Data[i].Data
+            })
+        }
+
+        var ctx = document.getElementById("bills-canvas").getContext("2d");
+        window.myBar = new Chart(ctx, {
+            type: 'bar',
+            data: barChartData,
+            options: {
+                title: {
+                    display: true,
+                    text: "Кiлькiсть законопроектiв по сесiям"
+                },
+                responsive: true,
+                scales: {
+                    xAxes: [{
+                        stacked: true,
+                    }],
+                    yAxes: [{
+                        stacked: true
+                    }]
+                }
+            }
+        });
+    }
+</script>

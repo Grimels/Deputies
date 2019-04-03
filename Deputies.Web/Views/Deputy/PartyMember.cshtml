@@ -1,0 +1,45 @@
+﻿@{
+    ViewBag.Title = "Обрані за партійними списками";
+}
+<div class="deps-buttons-wrapper">
+    <a href="@Url.Action("SingleMember", "Deputy")" class="btn btn-primary dep-header-button"><img class="btn-icon" src="~/Images/nav-icons/mentor.png"> Обрані по одномандатних округах</a>
+    <a href="@Url.Action("PartyMember", "Deputy")" class="btn btn-primary dep-header-button active"><img class="btn-icon" src="~/Images/nav-icons/party-member.png"> Обрані за партійними списками</a>
+    <a href="@Url.Action("ByAssociation", "Deputy")" class="btn btn-primary dep-header-button"><img class="btn-icon" src="~/Images/nav-icons/podium.png"> Члени депутатської фракції/групи</a>
+</div>
+
+<div class="text-center"><h1>Оберіть політичну партію</h1></div>
+<div class="row">
+    <div id="map" class="col-md-offset-3 col-md-6"></div>
+</div>
+<div class="row" style="margin-top: 20px;">
+    <div class="col-md-2 col-lg-2 col-sm-4 col-xs-6">
+        <a onclick="getDeputies('6bfeaf13-dbec-467d-932f-040ee1b2a108')"><img style="margin-bottom: 20px; cursor: pointer;" draggable="false" class="img-responsive img-thumbnail" src="../../Content/img/partys/bt.jpg" /></a>
+    </div>
+    <div class="col-md-2 col-lg-2 col-sm-4 col-xs-6">
+        <a onclick="getDeputies('1301194c-ac6d-43f2-95ec-eafb05ed8307')"><img style="margin-bottom: 20px;  cursor: pointer;" draggable="false" class="img-responsive img-thumbnail" src="../../Content/img/partys/ls.jpg" /></a>
+    </div>
+    <div class="col-md-2 col-lg-2 col-sm-4 col-xs-6">
+        <a onclick="getDeputies('5210e218-4816-476e-983e-69bc800898bf')"><img style="margin-bottom: 20px;  cursor: pointer;" draggable="false" class="img-responsive img-thumbnail" src="../../Content/img/partys/nf.jpg" /></a>
+    </div>
+    <div class="col-md-2 col-lg-2 col-sm-4 col-xs-6">
+        <a onclick="getDeputies('91131738-1e21-4378-ab1a-6053f678a6cc')"><img style="margin-bottom: 20px;  cursor: pointer;" draggable="false" class="img-responsive img-thumbnail" src="../../Content/img/partys/op-block.jpg" /></a>
+    </div>
+    <div class="col-md-2 col-lg-2 col-sm-4 col-xs-6">
+        <a onclick="getDeputies('be688a46-5c18-4c79-8798-d3b14c2c1eb5')"><img style="margin-bottom: 20px;  cursor: pointer;" draggable="false" class="img-responsive img-thumbnail" src="../../Content/img/partys/pp.jpg" /></a>
+    </div>
+    <div class="col-md-2 col-lg-2 col-sm-4 col-xs-6">
+        <a onclick="getDeputies('9ad4da3d-6720-44fd-98b7-a85527d12237')"><img style="margin-bottom: 20px;  cursor: pointer;" draggable="false" class="img-responsive img-thumbnail" src="../../Content/img/partys/sp.jpg" /></a>
+    </div>
+</div>
+
+<div id="deputies">
+
+</div>
+
+<script>
+    function getDeputies(id) {
+        $.get('/deputy/DeputiesByParty?partyId=' + id, function (resp) {
+            $('#deputies').html(resp);
+        });
+    }
+</script>

@@ -1,0 +1,148 @@
+﻿@using Deputies.Web.Helpers
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>@ViewBag.Title - Депутатські запити</title>
+    <script type="text/javascript" src="https://code.jquery.com/jquery-2.2.4.js"></script>
+    <script type="text/javascript" src="~/Content/bootstrap/js/bootstrap.js"></script>
+    <script type="text/javascript" src="~/Content/jquery.twbsPagination.min.js"></script>
+    <script src="http://d3js.org/d3.v3.min.js"></script>
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $("body").tooltip({ selector: '[data-toggle=tooltip]' });
+        });
+    </script>
+    <link rel="stylesheet" type="text/css" href="~/Content/bootstrap/css/bootstrap.css">
+    <link rel="stylesheet" type="text/css" href="~/Content/font-awesome-4.7.0/css/font-awesome.css">
+    <link rel="stylesheet" type="text/css" href="~/Content/style.css">
+</head>
+
+<body>
+    <div style="display: table; height: 100%; width: 100%;">
+        <div style="display: table-row; height: 1px;">
+            <nav class="navbar navbar-inverse @(HttpContext.Current.Request.Url.AbsolutePath == "/" ? "" : "header-min")">
+                <div class="container">
+
+                    <div class="navbar-header">
+                        <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-2">
+                            <span class="sr-only">Toggle navigation</span>
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                        </button>
+                    </div>
+
+                    <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-2">
+                        <a href="@Url.Action("Index", "Home")"><img class="logo" src="~/Images/@(HttpContext.Current.Request.Url.AbsolutePath == "/" ? "logo" : "logo-inverse").png" draggable="false" /></a>
+                        <ul class="nav navbar-nav navbar-right">
+                            <li class="nav-item dropdown analytics-dropdown">
+                                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    Аналітика <span class="glyphicon glyphicon-chevron-down"></span>
+                                </a>
+                                <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                                    <a class="dropdown-item" href="@Url.Action("BillsBySessions", "Analytics")">По законопроектам</a>
+                                    <a class="dropdown-item" href="@Url.Action("InquriesBySessions", "Analytics")">По запитам</a>
+                                </div>
+                            </li>
+                            @Html.MenuLink("Депутати", "SingleMember", "Deputy")
+                            @Html.MenuLink("Законопроекты", "Index", "Bills")
+                            @Html.MenuLink("Запити", "Inquries", "Home")
+                        </ul>
+                    </div>
+                </div>
+            </nav>
+            @if (@HttpContext.Current.Request.Url.AbsolutePath == "/")
+            {
+                <div style="height: 550px; background: url(../../Images/header-bg.jpg) no-repeat; background-size: 100% 100%; color: white;">
+                    <div class="container">
+                        <div class="row">
+                            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                <h1 style="margin-top: 160px; margin-bottom:30px;">Web-сервiс депутатських запитiв</h1>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-lg-7 col-md-7 col-sm-12 col-xs-12">
+                                <form action="/Home/Filter" method="get">
+                                    <div class="form-group">
+                                        <div class="input-group">
+                                            <input name="query" placeholder="Знайти запити Народного депутата..." id="search-input" type="text" class="form-control">
+                                            <span class="input-group-btn">
+                                                <button id="submit" style="background-color:#ffe400 !important;" class="btn btn-default" type="submit">Пошук</button>
+                                            </span>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 what-to-do">
+                                <p><i class="fa fa-info-circle fa-lg" style="margin-right: 14px; margin-left: 4px; color: #ffe400 !important;"></i>Вичерпна iнформацiя</p>
+                                <p><i class="fa fa-area-chart fa-lg" style="margin-right: 12px; color: #ffe400 !important;"></i>Комплексна аналiтика</p>
+                                <p><i class="fa fa-unlock-alt fa-lg" style="margin-right: 17px; margin-left: 7px; color: #ffe400 !important;"></i>Максимальна прозорiсть</p>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            }
+
+        </div>
+        <div style="height: auto" class="container body-content">
+            @RenderBody()
+        </div>
+
+        <div style="display: table-row; height: 1px; background: url(../../Images/footer-bg.jpg) no-repeat; background-size: 100% 100%; color: white; margin-top: 30px;">
+            <div style="padding: 10px 0;" class="container">
+                <div class="row">
+                    <div class="col-md-3">
+                        <h4>Про проект</h4>
+                        <hr />
+                        <p>Це новий інструмент електронної демократії, що допоможе громадянам отримувати якісну та вичерпну інформацію щодо запитів Народних депутатів, ефективно взаємодіяти та безпосередньо впливати на них, а депутатам – досягти нового рівня прозорості та ефективності.</p>
+                    </div>
+                    <div class="col-md-3">
+                        <h4>Сайт</h4>
+                        <hr />
+                        <p><a style="color: white;" href="@Url.Action("Index", "Home")">Головна</a></p>
+                        <p><a style="color: white;" href="@Url.Action("Inquries", "Home")">Запити</a></p>
+                        <p><a style="color: white;" href="@Url.Action("SingleMember", "Deputy")">Депутати</a></p>
+                        <p><a style="color: white;" href="@Url.Action("InquriesBySessions", "Analytics")">Аналiтика</a></p>
+                    </div>
+                    <div class="col-md-3">
+                        <h4>Розповiсти</h4>
+                        <hr />
+                        <div style="margin-top: 20px;" class="addthis_inline_share_toolbox" data-url="@HttpContext.Current.Request.Url.Host" data-title="Web-сервiс депутатських запитiв"></div>
+                    </div>
+                    <div class="col-md-3">
+                        <h4>Зв’язок</h4>
+                        <hr />
+
+                        <form action="/home/feedback" method="POST">
+                            <div class="form-group">
+                                <input required name="Name" placeholder="Ваше iм'я" class="form-control" id="focusedInput" type="text">
+                            </div>
+                            <div class="form-group">
+                                <input required name="From" placeholder="Ваш E-mail" class="form-control" id="focusedInput" type="email">
+                            </div>
+                            <div class="form-group">
+                                <textarea required name="Body" placeholder="Текст повiдомленн" class="form-control" rows="2"></textarea>
+                            </div>
+                            <button style="background-color:#ffe400 !important;" class="btn btn-default pull-right">Надiслати</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div style="display: table-row; height: 1px; color: white; background-color: #212121;">
+            <div style="padding: 10px 0;" class="container">
+                <div>
+                    &copy; 2017 | Web-сервiс депутатських запитiв
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Go to www.addthis.com/dashboard to customize your tools -->
+    <script type="text/javascript" src="//s7.addthis.com/js/300/addthis_widget.js#pubid=ra-589a4485fa412cc3"></script>
+</body>
+</html>

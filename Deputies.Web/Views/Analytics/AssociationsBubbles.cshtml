@@ -1,0 +1,105 @@
+﻿
+@{
+    ViewBag.Title = "Бульбашкова діаграма фракцiй";
+}
+
+<script src="~/Content/Chart.bundle.min.js"></script>
+<script src="~/Content/utils.js"></script>
+<style>
+    canvas {
+        -moz-user-select: none;
+        -webkit-user-select: none;
+        -ms-user-select: none;
+    }
+</style>
+
+<div class="deps-buttons-wrapper">
+    <a href="@Url.Action("InquriesBySessions", "Analytics")" class="btn btn-primary dep-header-button"><img class="btn-icon" src="~/Images/nav-icons/analitics/inquries.png"> Кiлькiсть запитiв по сесiям</a>
+    <a href="@Url.Action("Deputies", "Analytics")" class="btn btn-primary dep-header-button"><img class="btn-icon" src="~/Images/nav-icons/analitics/deputies.png"> Рейтинг депутатiв</a>
+    <a href="@Url.Action("Associations", "Analytics")" class="active btn btn-primary dep-header-button"><img class="btn-icon" src="~/Images/nav-icons/analitics/fractions.png"> Рейтинг фракцiй</a>
+    <a href="@Url.Action("Problems", "Analytics")" class="btn btn-primary dep-header-button"><img class="btn-icon" src="~/Images/nav-icons/analitics/problems.png"> Проблематика запитiв</a>
+    <a href="@Url.Action("Organizations", "Analytics")" class="btn btn-primary dep-header-button"><img class="btn-icon" src="~/Images/nav-icons/analitics/organisations.png"> Органiзацiї з найбiльшою кiлькiстью звернень</a>
+</div>
+<h2>Рейтинг фракцiй</h2>
+<div style="margin-top: 20px;" class="btn-group btn-group-justified">
+    <a style="white-space: normal;" href="@Url.Action("Associations", "Analytics")" class="btn btn-default">Рейтинг</a>
+    <a style="white-space: normal;" href="@Url.Action("AssociationsBubbles", "Analytics")" class="btn btn-primary">Бульбашкова діаграма</a>
+</div>
+
+<div id="loader" class="loader"></div>
+<div id="wrapper" style="margin: 20px auto;display: none;">
+    <canvas id="canvas"></canvas>
+</div>
+<script>
+        window.onload = function () {
+
+            $.get('/Analytics/AssociationsData', function (resp) {
+                var color = Chart.helpers.color;
+                var colorNames = Object.keys(window.chartColors);
+                var dataset = [];
+                for (var i in resp.Associations) {
+                    var colorName = colorNames[i % colorNames.length];
+                    var dsColor = window.chartColors[colorName];
+                    dataset.push({
+                        label: resp.Associations[i].Name,
+                        backgroundColor: color(dsColor).alpha(0.5).rgbString(),
+                        borderColor: dsColor,
+                        borderWidth: 1,
+                        data: [{
+                            x: resp.Associations[i].Place,
+                            y: resp.Associations[i].Deputies,
+                            r: resp.Associations[i].InquriesPerDeputy,
+                        }]
+                    });
+                }
+
+
+                var bubbleChartData = {
+                    animation: {
+                        duration: 10000
+                    },
+                    datasets: dataset
+                };
+
+                var ctx = document.getElementById("canvas").getContext("2d");
+                window.myChart = new Chart(ctx, {
+                    type: 'bubble',
+                    data: bubbleChartData,
+                    options: {
+                        responsive: true,
+                        title: {
+                            display: true,
+                            text: 'Бульбашкова діаграма фракцiй'
+                        },
+                        tooltips: {
+                            mode: 'single',
+                            callbacks: {
+                                label: function (tooltipItems, data) {
+                                    var item = data.datasets[tooltipItems.datasetIndex].data[0];
+                                    return 'Мiсце у рейтингу: ' + item.x + ', Кiлькiсть депутатiв: ' + item.y + ', Запитiв на одного депутата: ' + item.r;
+                                }
+                            },
+                        },
+                        scales: {
+                            xAxes: [{
+                                scaleLabel: {
+                                    display: true,
+                                    labelString: 'Мiсце у рейтингу'
+                                }
+                            }],
+                            yAxes: [{
+                                scaleLabel: {
+                                    display: true,
+                                    labelString: 'Кiлькiсть депутатiв'
+                                }
+                            }]
+                        }
+                    }
+                });
+
+                $('#wrapper').show();
+                $('#loader').hide();
+            });
+        };
+</script>
+

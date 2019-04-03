@@ -1,0 +1,98 @@
+﻿@using System.Diagnostics.Eventing.Reader
+@using PagedList.Mvc
+@model Deputies.BLL.Features.Bills.Models.BillsListModel
+
+@{
+    ViewBag.Title = "Законопроекти депутата";
+}
+
+<div class="row" style="margin-top: 20px;">
+    <div class="col-md-12 clearfix">
+        <div class="clearfix">
+            <h3>Законопроекти депутата @Model.DeputyName</h3>
+            <div style="margin-bottom: 10px;" class="row">
+                <div class="col-xs-6 clearfix">
+                    <div id="sort" class="pull-left">Сортування: <a href="@(Model.Asc ? @Url.Action("BillsByDeputy", "Bills", new {asc = false, deputyId = Model.DeputyId}) : @Url.Action("BillsByDeputy", "Bills", new {asc = true, deputyId = Model.DeputyId}))">Дата <span class="glyphicon  @(Model.Asc ? "glyphicon-chevron-up" : "glyphicon-chevron-down")" aria-hidden="true"></span></a></div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12"><ul class="pagination" style="margin-top: 0"></ul></div>
+                <div class="col-md-12"><p><b>Усього запитів: @Model.Count</b></p></div>
+            </div>
+        </div>
+
+        @foreach (var bill in @Model.Bills)
+        {
+            <div class="panel panel-default">
+                <div class="panel-heading clearfix">
+                    <div class="row">
+                        <div class="col-xs-6 clearfix">
+                            <div class="pull-left">
+                                <a href="@Url.Action("Bill", "Bills", new {id = bill.Id})"><b>Законопроект @bill.Number від @bill.DateRaw</b></a>
+                            </div>
+                        </div>
+                        <div class="col-xs-6 clearfix">
+                            <div class="pull-right">
+                                <span class="label label-info">@bill.Session сесія </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="panel-body">
+                    @if (@bill.Title != null)
+                    {
+                        <p><span class="glyphicon glyphicon-comment" aria-hidden="true"></span> <b>Зміст законопроекту: </b>@bill.Title</p>
+                    }
+                    @if (@bill.Rubric != null)
+                    {
+                        <p><span class="glyphicon glyphicon-list-alt" aria-hidden="true"></span> <b>Рубрика законопроекту: </b>@bill.Rubric</p>
+                    }
+                    @if (bill.Initiators != null)
+                    {
+                        <p>
+                            <span class="glyphicon glyphicon-user" aria-hidden="true"></span> <b> Ініціатор(и) законопроекту: </b>
+                            @for (var i = 0; i < bill.Initiators.Count; i++)
+                            {
+                                if (bill.Initiators[i].Id != null)
+                                {
+                                    <a href="@Url.Action("Deputy", "Home", new {deputyId = bill.Initiators[i].Id})">@bill.Initiators[i].Name</a>@(i != bill.Initiators.Count - 1 ? ", " : "")
+                                }
+                                else
+                                {
+                                    <span>@bill.Initiators[i].Name</span>@(i != bill.Initiators.Count - 1 ? ", " : "")
+                                }
+                            }
+                        </p>
+                    }
+                </div>
+            </div>
+        }
+        <ul class="pagination" id="pagination"></ul>
+    </div>
+</div>
+
+<script>
+    function updateQueryStringParameter(uri, key, value) {
+        var re = new RegExp("([?&])" + key + "=.*?(&|$)", "i");
+        var separator = uri.indexOf('?') !== -1 ? "&" : "?";
+        if (uri.match(re)) {
+            return uri.replace(re, '$1' + key + "=" + value + '$2');
+        }
+        else {
+            return uri + separator + key + "=" + value;
+        }
+    }
+
+    $(function () {
+        window.pagObj = $('.pagination').twbsPagination({
+            totalPages: +'@Model.PagingModel.Total',
+            visiblePages: 5,
+            startPage: +'@Model.PagingModel.Current',
+            onPageClick: function (event, page) {
+                console.info(page + ' (from options)');
+            }
+        }).on('page', function (event, page) {
+            window.location.href = updateQueryStringParameter(window.location.href, 'page', page);
+        });
+    });
+</script>

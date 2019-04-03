@@ -1,0 +1,61 @@
+﻿@model Deputies.BLL.Features.Inquiries.Models.InquiryModel
+@{
+    ViewBag.Title = "Запит " + Model.RequestNumber + " від " + Model.DateRaw;
+}
+
+<div class="panel panel-default" style="margin-top: 20px;">
+    <div class="panel-heading clearfix">
+        <div class="pull-left"><b>Запит @Model.RequestNumber від @Model.DateRaw</b></div>
+        <div class="pull-right"><span class="label @(Model.InquryAnswers.Any() ? "label-success" : "label-warning")">@(Model.InquryAnswers.Any() ? "Виконано" : "Розглядається")  </span></div>
+        <div class="pull-right"><span class="label label-info">@Model.Session сесія </span></div>
+    </div>
+    <div class="panel-body">
+        <p><span class="glyphicon glyphicon-user" aria-hidden="true"></span> <b> Автор: </b> <a href="@Url.Action("Deputy", "Home", new {deputyId = Model.AuthorId})">@Model.Author</a></p>
+        @if (Model.Coauthors.Any())
+        {
+            <p>
+                <span class="glyphicon glyphicon-user" aria-hidden="true"></span> <b> Спiвавтори: </b>
+                @for (var i = 0; i < Model.Coauthors.Count; i++)
+                {
+                    <a href="@Url.Action("Deputy", "Home", new {deputyId = Model.Coauthors[i].Id})">@Model.Coauthors[i].Name</a>@(i != Model.Coauthors.Count - 1 ? ", " : "")
+                }
+            </p>
+        }
+        <p><span class="glyphicon glyphicon-lock" aria-hidden="true"></span> <b>До кого: </b>@Model.Destination</p>
+        <p><span class="glyphicon glyphicon-bullhorn" aria-hidden="true"></span> <b>Проблематика: </b>@Model.Problem</p>
+        <p><span class="glyphicon glyphicon-list-alt" aria-hidden="true"></span> <b>Тип запиту: </b> @(Model.CoauthorIds.Any() ? "Колективний" : "Індивідуальний") </p>
+        <p><span class="glyphicon glyphicon glyphicon-comment" aria-hidden="true"></span> <b>Зміст запиту: </b> @Model.Body </p>
+
+        @if (Model.BodyUrl != null)
+        {
+            <a href="@Model.BodyUrl"><img class="pull-left" data-toggle="tooltip" data-placement="top" title="" data-original-title="Завантажити PDF версію" src="~/Content/img/acrobat-flat.png" width="40px" height="40px" /></a>
+        }
+
+
+
+        <div class="pull-right">
+            <div class="addthis_inline_share_toolbox" data-description="@Model.Body" data-url="@HttpContext.Current.Request.Url" data-title="@ViewBag.Title"></div>
+            @*<img class="pull-left" data-toggle="tooltip" data-placement="top" title="" data-original-title="Поділитись у VK" src="~/Content/img/vk-flat.png" width="40px" height="40px" style="margin-right: 5px;" />
+                <img class="pull-left" data-toggle="tooltip" data-placement="top" title="" data-original-title="Поділитись у Facebook" src="~/Content/img/facebook-flat.png" width="40px" height="40px" />*@
+        </div>
+    </div>
+</div>
+
+@if (Model.InquryAnswers.Any())
+{
+    <h3>Відповіді</h3>
+    foreach (var answer in Model.InquryAnswers)
+    {
+        <div class="panel panel-default">
+            <div class="panel-body">
+                <p><span class="glyphicon glyphicon glyphicon-calendar" aria-hidden="true"></span> <b> Дата ознайомлення: </b>@answer.FamiliarizationDateRaw</p>
+                <p><span class="glyphicon glyphicon glyphicon-calendar" aria-hidden="true"></span> <b> Дата відповіді: </b>@answer.AnswerDateRaw</p>
+                <p><span class="glyphicon glyphicon glyphicon-comment" aria-hidden="true"></span> <b>Зміст відповіді: </b>@answer.AnswerBody</p>
+                @if (answer.AnswerBodyUrl != null)
+                {
+                    <a href="@answer.AnswerBodyUrl"><img class="pull-left" data-toggle="tooltip" data-placement="top" title="" data-original-title="Завантажити PDF версію" src="~/Content/img/acrobat-flat.png" width="40px" height="40px" /></a>
+                }
+            </div>
+        </div>
+    }
+}

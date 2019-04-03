@@ -1,0 +1,108 @@
+﻿
+@{
+    ViewBag.Title = "Обрані по одномандатних округах";
+}
+
+<style>
+    .region:hover {
+        fill: #006687 !important;
+    }
+</style>
+
+<div class="deps-buttons-wrapper">
+    <a href="@Url.Action("SingleMember", "Deputy")" class="btn btn-primary dep-header-button active"><img class="btn-icon" src="~/Images/nav-icons/mentor.png"> Обрані по одномандатних округах</a>
+    <a href="@Url.Action("PartyMember", "Deputy")" class="btn btn-primary dep-header-button"><img class="btn-icon" src="~/Images/nav-icons/party-member.png"> Обрані за партійними списками</a>
+    <a href="@Url.Action("ByAssociation", "Deputy")" class="btn btn-primary dep-header-button"><img class="btn-icon" src="~/Images/nav-icons/podium.png"> Члени депутатської фракції/групи</a>
+</div>
+<div class="text-center"><h1>Оберiть область</h1></div>
+<div class="row">
+    <div id="map" style="width: 75%; margin: 0 auto;"></div>
+</div>
+
+<div class="container" id="dep-list"></div>
+
+<script>
+
+    $("[data-toggle=tooltip]").hover(function () {
+        $('.tooltip').css('top', parseInt($('.tooltip').css('top')) + 150 + 'px')
+    });
+
+    var width1 = $('#map').width();
+    //$('#map').height(width1);
+
+    var width = width1;
+    var height = width1 * 0.72;
+
+    var vis = d3.select("#map").append("svg")
+      .attr("width", width).attr("height", height)
+
+    d3.json("/Content/ukraine.json", function (json) {
+        // create a first guess for the projection
+        var center = d3.geo.centroid(json)
+        var scale = 140;
+        var offset = [width / 2, height / 2];
+        var projection = d3.geo.mercator().scale(scale).center(center)
+          .translate(offset);
+
+        // create the path
+        var path = d3.geo.path().projection(projection);
+
+        // using the path determine the bounds of the current map and use
+        // these to determine better values for the scale and translation
+        var bounds = path.bounds(json);
+        var hscale = scale * width / (bounds[1][0] - bounds[0][0]);
+        var vscale = scale * height / (bounds[1][1] - bounds[0][1]);
+        var scale = (hscale < vscale) ? hscale : vscale;
+        var offset = [width - (bounds[0][0] + bounds[1][0]) / 2,
+          height - (bounds[0][1] + bounds[1][1]) / 2
+        ];
+
+        // new projection
+        projection = d3.geo.mercator().center(center)
+          .scale(scale - 90).translate(offset);
+        path = path.projection(projection);
+
+        // add a rectangle to see the bound of the svg
+        vis.append("rect").attr('width', width).attr('height', height)
+          .style('fill', 'none');
+
+        vis.selectAll("path").data(json.features).enter().append("path")
+            .attr("d", path)
+            .attr("class", "region")
+            .style("fill", "#007196")
+            .style("cursor", "pointer")
+            .style("stroke-width", "1")
+            .style("stroke", "white")
+            .on("click", function (path) {
+                $.get('/deputy/SingleMemberByRegion?region=' + path.properties['name:uk'], function (resp) {
+                    $('#dep-list').html(resp);
+                });
+            });
+
+        var pathes = [];
+        vis.selectAll("path").forEach(function (path) { pathes.push(path); });
+
+        var i = 0;
+        $.get('/deputy/SingleDeputiesCountByRegions', function (resp) {
+            console.log(resp);
+            var all = vis.selectAll("path");
+            all[0].forEach(function (path) {
+                var region = pathes[0][i++]['__data__'].properties['name:uk'];
+                $(path).tooltip({
+                    title: region + '. Обрано депутатiв: ' + (first(resp, function (item) { return item.region == region; }).count || '0'), container: '#map'
+                });
+            })
+        });
+
+        // $(path).tooltip({ title: pathes[i++].properties['name:uk'], container: 'body' });
+
+        function first(array, predicate) {
+            for (var i = 0; i < array.length; ++i) {
+                if (predicate(array[i])) return array[i];
+            }
+
+            return false;
+        }
+    });
+
+</script>

@@ -1,0 +1,67 @@
+﻿@model Deputies.BLL.Features.Deputies.Models.DeputiesByRegionModel
+
+@if (Model.BySubregion.Any())
+{
+    foreach (var subRegion in Model.BySubregion)
+    {
+        <h1>@subRegion.RegionName</h1>
+
+        <table class="table table-striped table-hover ">
+            <thead>
+                <tr>
+                    <th>№ округа</th>
+                    <th>Межi округа</th>
+                    <th>Обраний депутат</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var deputyByConstituencyModel in @subRegion.ByRegion)
+                {
+                    <tr>
+                        <td>@deputyByConstituencyModel.Constituency.Number</td>
+                        <td>@deputyByConstituencyModel.Constituency.Boundaries</td>
+                        <td style="width: 15%" class="text-center">
+                            <a href="@Url.Action("Deputy", "Home", new {deputyId = deputyByConstituencyModel.Deputy.Id})"><img class="img-responsive img-thumbnail" src="@deputyByConstituencyModel.Deputy.PhotoLink" /></a>
+                            <p style="margin-top: 5px;">
+                                <b><a href="@Url.Action("Deputy", "Home", new {deputyId = deputyByConstituencyModel.Deputy.Id})">@deputyByConstituencyModel.Deputy.Name</a></b>
+                            </p>
+                        </td>
+                    </tr>
+                }
+
+            </tbody>
+        </table>
+    }
+}
+
+<h1>@Model.RegionName</h1>
+
+<table class="table table-striped table-hover ">
+    <thead>
+        <tr>
+            <th>№ округа</th>
+            <th>Межi округа</th>
+            <th>Обраний депутат</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var deputyByConstituencyModel in @Model.ByRegion)
+        {
+            <tr>
+                <td>@deputyByConstituencyModel.Constituency.Number</td>
+                <td>@deputyByConstituencyModel.Constituency.Boundaries</td>
+                <td style="width: 15%" class="text-center">
+                    <a href="@Url.Action("Deputy", "Home", new {deputyId = deputyByConstituencyModel.Deputy.Id})"><img class="img-responsive img-thumbnail" src="@deputyByConstituencyModel.Deputy.PhotoLink" /></a>
+                    <p style="margin-top: 5px;">
+                        <b><a href="@Url.Action("Deputy", "Home", new {deputyId = deputyByConstituencyModel.Deputy.Id})">@deputyByConstituencyModel.Deputy.Name</a></b>
+                    </p>
+                </td>
+            </tr>
+        }
+
+    </tbody>
+</table>
+
+
+
+

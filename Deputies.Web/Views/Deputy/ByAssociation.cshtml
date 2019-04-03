@@ -1,0 +1,72 @@
+﻿@{
+    ViewBag.Title = "Є членом депутатської фракції чи групи";
+}
+<div class="deps-buttons-wrapper">
+    <a href="@Url.Action("SingleMember", "Deputy")" class="btn btn-primary dep-header-button"><img class="btn-icon" src="~/Images/nav-icons/mentor.png"> Обрані по одномандатних округах</a>
+    <a href="@Url.Action("PartyMember", "Deputy")" class="btn btn-primary dep-header-button"><img class="btn-icon" src="~/Images/nav-icons/party-member.png"> Обрані за партійними списками</a>
+    <a href="@Url.Action("ByAssociation", "Deputy")" class="btn btn-primary dep-header-button active"><img class="btn-icon" src="~/Images/nav-icons/podium.png"> Члени депутатської фракції/групи</a>
+</div>
+<div class="text-center"><h1>Оберіть фракцію</h1></div>
+<div class="row">
+    <div id="map" class="col-md-offset-3 col-md-6"></div>
+</div>
+<div class="row" style="margin-top: 20px;">
+    <div class="col-md-2 col-lg-2 col-sm-4 col-xs-6">
+        <a onclick="getDeputies('566fe342-11fa-436e-b557-6259982d4f9c')"><img style="margin-bottom: 20px; cursor: pointer;" draggable="false" class="img-responsive img-thumbnail" src="~/Content/img/associations/Фракція партії «Блок Петра Порошенка».jpg" /></a>
+    </div>
+    <div class="col-md-2 col-lg-2 col-sm-4 col-xs-6">
+        <a onclick="getDeputies('76b94830-713d-4ad0-a273-5af98aa24ce0')"><img style="margin-bottom: 20px;  cursor: pointer;" draggable="false" class="img-responsive img-thumbnail" src="~/Content/img/associations/Фракція політичної партії «Народний фронт».jpg" /></a>
+    </div>
+    <div class="col-md-2 col-lg-2 col-sm-4 col-xs-6">
+        <a onclick="getDeputies('01ba6d97-2b56-44b7-bcbc-0d209c320cc2')"><img style="margin-bottom: 20px;  cursor: pointer;" draggable="false" class="img-responsive img-thumbnail" src="~/Content/img/associations/Фракція політичної партії «Опозиційний блок».jpg" /></a>
+    </div>
+    <div class="col-md-2 col-lg-2 col-sm-4 col-xs-6">
+        <a onclick="getDeputies('868b59bd-78a0-4ed1-90d0-114894fdf72e')"><img style="margin-bottom: 20px;  cursor: pointer;" draggable="false" class="img-responsive img-thumbnail" src="~/Content/img/associations/Фракція політичної партії «Об’єднання «Самопоміч».jpg" /></a>
+    </div>
+    <div class="col-md-2 col-lg-2 col-sm-4 col-xs-6">
+        <a onclick="getDeputies('f0db062b-35d0-4b16-8f6a-78ae95676264')"><img style="margin-bottom: 20px;  cursor: pointer;" draggable="false" class="img-responsive img-thumbnail" src="~/Content/img/associations/Фракція радикальної партії Олега Ляшка.jpg" /></a>
+    </div>
+    <div class="col-md-2 col-lg-2 col-sm-4 col-xs-6">
+        <a onclick="getDeputies('534c1849-2906-4d54-87c9-cfa5c7d68c83')"><img style="margin-bottom: 20px;  cursor: pointer;" draggable="false" class="img-responsive img-thumbnail" src="~/Content/img/associations/Фракція політичної партії «Всеукраїнське об’єднання «Батьківщина».jpg" /></a>
+    </div>
+</div>
+<div class="row" style="margin-top: 10px;">
+    <div class="col-md-2 col-lg-2 col-sm-4 col-xs-6">
+        <a onclick="getDeputies('72f7ae4b-1bd6-465c-917b-23e6bd9dd9bc')"><img style="margin-bottom: 20px; cursor: pointer;" draggable="false" class="img-responsive img-thumbnail" src="~/Content/img/associations/Група «Воля народу».jpg" /></a>
+    </div>
+    <div class="col-md-2 col-lg-2 col-sm-4 col-xs-6">
+        <a onclick="getDeputies('d0a2408c-aacd-46b3-86c5-49846bd7e1ce')"><img style="margin-bottom: 20px;  cursor: pointer;" draggable="false" class="img-responsive img-thumbnail" src="~/Content/img/associations/Група «Партія «Відродження».jpg" /></a>
+    </div>
+    <div class="col-md-2 col-lg-2 col-sm-4 col-xs-6">
+        <a onclick="getDeputies('70b22e66-8016-4c4b-ab59-85f4e16c8ced')"><img style="margin-bottom: 20px;  cursor: pointer;" draggable="false" class="img-responsive img-thumbnail" src="~/Content/img/associations/Не входить до складу жодної фракції чи групи.jpg" /></a>
+    </div>
+</div>
+
+<div id="deputies">
+
+</div>
+
+<script>
+    var id = getParameterByName('associationId', window.location.href);
+    debugger;
+    if (id) {
+        getDeputies(id);
+    }
+
+
+    function getDeputies(id) {
+        $.get('/deputy/DeputiesByAssociation?id=' + id, function (resp) {
+            $('#deputies').html(resp);
+        });
+    }
+
+    function getParameterByName(name, url) {
+        if (!url) url = window.location.href;
+        name = name.replace(/[\[\]]/g, "\\$&");
+        var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
+            results = regex.exec(url);
+        if (!results) return null;
+        if (!results[2]) return '';
+        return decodeURIComponent(results[2].replace(/\+/g, " "));
+    }
+</script>

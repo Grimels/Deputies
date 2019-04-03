@@ -1,0 +1,223 @@
+﻿@model Deputies.BLL.Features.Index.Models.IndexModel
+@{
+    ViewBag.Title = "Головна";
+}
+
+
+<script src="~/Content/Chart.bundle.min.js"></script>
+<script src="~/Content/utils.js"></script>
+
+
+<div class="row">
+    <div class="col-md-12">
+
+        <div class="text-center">
+            <h2>Web-сервіс надає можливість</h2>
+        </div>
+        <div style="margin: 20px 0" class="row">
+            <div class="col-lg-3 col-md-3 col-sm-6 col-sm-6 text-center">
+                <img style="display: block; margin: 10px auto;" draggable="false" src="~/Images/1.png" />
+                <p class="site-allows-label">Переглядати усі депутатські запити</p>
+            </div>
+            <div class="col-lg-3 col-md-3 col-sm-6 col-sm-6 text-center">
+                <img style="display: block; margin: 10px auto;" draggable="false" src="~/Images/2.png" />
+                <p class="site-allows-label">Фільтрувати, сортувати депутатські запити</p>
+            </div>
+            <div class="col-lg-3 col-md-3 col-sm-6 col-sm-6 text-center">
+                <img style="display: block; margin: 10px auto;" draggable="false" src="~/Images/3.png" />
+                <p class="site-allows-label">Переглядати інформацію про депутатів та їх запити</p>
+            </div>
+            <div class="col-lg-3 col-md-3 col-sm-6 col-sm-6 text-center">
+                <img style="display: block; margin: 10px auto;" draggable="false" src="~/Images/4.png" />
+                <p class="site-allows-label">Переглядати аналітику по депутатським запитам</p>
+            </div>
+
+            <div class="col-lg-3 col-md-3 col-sm-6 col-sm-6 text-center">
+                <img style="display: block; margin: 10px auto;" draggable="false" src="~/Images/5.png" />
+                <p class="site-allows-label">Шукати запити за автором, змістом, установою одержувачем</p>
+            </div>
+            <div class="col-lg-3 col-md-3 col-sm-6 col-sm-6 text-center">
+                <img style="display: block; margin: 10px auto;" draggable="false" src="~/Images/6.png" />
+                <p class="site-allows-label">Переглядати індивідуальну аналітику депутатів</p>
+            </div>
+            <div class="col-lg-3 col-md-3 col-sm-6 col-sm-6 text-center">
+                <img style="display: block; margin: 10px auto;" draggable="false" src="~/Images/7.png" />
+                <p class="site-allows-label">Поширювати інформацію про запити в соціальних мережах</p>
+            </div>
+            <div class="col-lg-3 col-md-3 col-sm-6 col-sm-6 text-center">
+                <img style="display: block; margin: 10px auto;" draggable="false" src="~/Images/8.png" />
+                <p class="site-allows-label">Підписатися на оновлення запитів окремого депутата</p>
+            </div>
+        </div>
+
+        <div class="text-center index-header">
+            <h2>Найактивніші депутати</h2>
+        </div>
+        <div style="margin: 20px 0 0 0" class="row">
+            @foreach (var rating in Model.Items)
+            {
+                <div style="border: none; box-shadow: none;" class="panel panel-default">
+                    <div class="panel-body">
+                        <div class="pull-left">
+                            <img class="img-responsive img-thumbnail" src="@rating.Deputy.PhotoLink" />
+                        </div>
+                        <div style="padding:0 10px; font-size: 20px" class="pull-left">
+                            <p><b><a href="@Url.Action("Deputy", "Home", new {deputyId = rating.Deputy.Id})">@rating.Deputy.Name</a></b></p>
+                            <p>@rating.Deputy.Association</p>
+                            <p style="height: 130px; overflow: hidden;"><img draggable="false" style="width: 206px; position: relative; top: -45px;" class="img-responsive" src="~/Content/img/associations/@(rating.Deputy.Association).jpg" /></p>
+                        </div>
+                        <div style="width: 300px;" class="pull-right text-center">
+                            <div style="width: 210px; margin: 0 auto;">
+                                <canvas id="@rating.Deputy.Id"></canvas>
+                                <script>
+                                    var ctx = document.getElementById("@rating.Deputy.Id");
+                                    var data = {
+                                        labels: [
+                                            "Індивідуальні",
+                                            "Коллективні"
+                                        ],
+                                        datasets: [
+                                            {
+                                                data: [@rating.IndividualInquries, @rating.CollectiveInquries],
+                                                backgroundColor: [
+                                                    "#005595",
+                                                    "#FFCE56"
+                                                ],
+                                                hoverBackgroundColor: [
+                                                    "#005595",
+                                                    "#FFCE56"
+                                                ]
+                                            }]
+                                    };
+                                    var myDoughnutChart = new Chart(ctx, {
+                                        type: 'doughnut',
+                                        data: data,
+                                        options: {
+                                            animation: {
+                                                animateScale: true
+                                            }
+                                        }
+                                    });
+                                </script>
+
+                            </div>
+                        </div>
+                        <div class="pull-right text-center" style="margin-top: 56px">
+                            <p style="font-size: 40px">@(rating.CollectiveInquries + rating.IndividualInquries)</p>
+                            <p style="font-size: 24px">запитів</p>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+        <div class="text-center">
+            <a style="font-size: 20px; padding: 12px 16px;" class="btn btn-primary" href="@Url.Action("Deputies", "Analytics")">Переглянути весь рейтинг депутатів</a>
+        </div>
+
+        <div class="text-center index-header">
+            <h2>Найактивніші депутатські фракції та групи</h2>
+        </div>
+        <div style="margin: 20px 0" class="associations-rating">
+            <p style="line-height: 26px; white-space: initial">
+                <img class="icon" src="~/Images/Associations-chart-icons/1.png" draggable="false" /> — Кiлькiсть запитiв, поданих представниками фракцii/групи
+            </p>
+            <p style="line-height: 26px; white-space: initial">
+                <img class="icon" src="~/Images/Associations-chart-icons/2.png" draggable="false" /> — Загальна кiлькiсть депутатiв у фракцii/групi
+            </p>
+            <p style="line-height: 26px; white-space: initial">
+                <img class="icon" src="~/Images/Associations-chart-icons/3.png" draggable="false" /> — Запитiв на одного депутата фракцii/групи
+            </p>
+            <div class="icons">
+                <p><img class="icon" src="~/Images/Associations-chart-icons/1.png" draggable="false" /></p>
+                <p><img class="icon" src="~/Images/Associations-chart-icons/2.png" draggable="false" /></p>
+                <p><img class="icon" src="~/Images/Associations-chart-icons/3.png" draggable="false" /></p>
+            </div><div class="rating-item">
+                <p class="header text-center">@Model.Associations.Associations[0].Inquries</p>
+                <div class="bar-wrapper">
+                    <p class="sub-header text-center">@Model.Associations.Associations[0].Deputies</p>
+                    <div class="bar" style="height: 300px;">
+                        <p class="text-center value">@Model.Associations.Associations[0].InquriesPerDeputy</p>
+                    </div>
+                </div>
+                <hr />
+                <div class="association-img">
+                    <img src="~/Content/img/associations/@(Model.Associations.Associations[0].Name).jpg" />
+                </div>
+                <hr style="margin-top: 28px;" class="dotted" />
+                <div class="liders-wrapper">
+                    @foreach (var deputy in Model.Associations.Associations[0].TopDeputies)
+                    {
+                        <div class="lider">
+                            <div class="lider-icon" style="display: inline-block;">
+                                <img src="@deputy.PhotoLink" />
+                            </div>
+                            <div style="display: inline-block; width: 130px; font-size: 20px; position: relative; top: -36px; left: -10px;">
+                                @deputy.InquriesCount запитiв
+                            </div>
+                            <p><a style="white-space: pre-wrap;" href="@Url.Action("Deputy", "Home", new {deputyId = deputy.Id})"><b>@deputy.Name</b></a></p>
+                        </div>
+                    }
+                </div>
+            </div><div class="rating-item">
+                <p class="header text-center">@Model.Associations.Associations[1].Inquries</p>
+                <div class="bar-wrapper">
+                    <p class="sub-header text-center">@Model.Associations.Associations[1].Deputies</p>
+                    <div class="bar" style="height: @(Math.Round((300*Model.Associations.Associations[1].InquriesPerDeputy)/Model.Associations.Associations[0].InquriesPerDeputy))px;">
+                        <p class="text-center value">@Model.Associations.Associations[1].InquriesPerDeputy</p>
+                    </div>
+                </div>
+                <hr />
+                <div class="association-img">
+                    <img src="~/Content/img/associations/@(Model.Associations.Associations[1].Name).jpg" />
+                </div>
+                <span class="liders"><b>ЛIДЕРИ</b></span>
+                <hr class="dotted" />
+                <div class="liders-wrapper">
+                    @foreach (var deputy in Model.Associations.Associations[1].TopDeputies)
+                    {
+                        <div class="lider">
+                            <div class="lider-icon" style="display: inline-block;">
+                                <img src="@deputy.PhotoLink" />
+                            </div>
+                            <div style="display: inline-block; width: 130px; font-size: 20px; position: relative; top: -36px; left: -10px;">
+                                @deputy.InquriesCount запитiв
+                            </div>
+                            <p><a style="white-space: pre-wrap;" href="@Url.Action("Deputy", "Home", new {deputyId = deputy.Id})"><b>@deputy.Name</b></a></p>
+                        </div>
+                    }
+                </div>
+            </div><div class="rating-item">
+                <p class="header text-center">@Model.Associations.Associations[2].Inquries</p>
+                <div class="bar-wrapper">
+                    <p class="sub-header text-center">@Model.Associations.Associations[2].Deputies</p>
+                    <div class="bar" style="height: @(Math.Round((300*Model.Associations.Associations[2].InquriesPerDeputy)/Model.Associations.Associations[0].InquriesPerDeputy))px;">
+                        <p class="text-center value">@Model.Associations.Associations[2].InquriesPerDeputy</p>
+                    </div>
+                </div>
+                <hr />
+                <div class="association-img">
+                    <img src="~/Content/img/associations/@(Model.Associations.Associations[2].Name).jpg" />
+                </div>
+                <hr style="margin-top: 28px;" class="dotted" />
+                <div class="liders-wrapper">
+                    @foreach (var deputy in Model.Associations.Associations[2].TopDeputies)
+                    {
+                        <div class="lider">
+                            <div class="lider-icon" style="display: inline-block;">
+                                <img src="@deputy.PhotoLink" />
+                            </div>
+                            <div style="display: inline-block; width: 130px; font-size: 20px; position: relative; top: -36px; left: -10px;">
+                                @deputy.InquriesCount запитiв
+                            </div>
+                            <p><a style="white-space: pre-wrap;" href="@Url.Action("Deputy", "Home", new {deputyId = deputy.Id})"><b>@deputy.Name</b></a></p>
+                        </div>
+                    }
+                </div>
+            </div>
+
+        </div>
+        <div style="margin: 21px;" class="text-center">
+            <a style="font-size: 20px; padding: 12px 16px;" class="btn btn-primary" href="@Url.Action("Associations", "Analytics")">Переглянути весь рейтинг фракцій</a>
+        </div>
+    </div>
+</div>

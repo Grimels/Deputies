@@ -1,0 +1,217 @@
+﻿@using System.Diagnostics.Eventing.Reader
+@using PagedList.Mvc
+@model Deputies.BLL.Features.Bills.Models.BillsListModel
+
+@{
+    ViewBag.Title = "Усі законопроекти";
+}
+
+<div class="row" style="margin-top: 20px;">
+    <div id="filter-form" class="col-md-2">
+      <div class="form-group">
+            <button style="width: 100%" id="filter-submit" type="submit" class="btn btn-primary"><span class="glyphicon glyphicon-filter"></span> Фільтрувати</button>
+        </div>
+
+        <div class="list-group">
+            <a id="session" class="list-group-item">
+                <h4 class="list-group-item-heading" style="cursor: pointer;" data-toggle="collapse" data-target="#sessionBlock" for="inputDefault">Сесія ВР</h4>
+                <div id="sessionBlock" class="collapse">
+                    @for (var i = 0; i < Model.FilterModel.Sessions.Count; i++)
+                    {
+                        <div class="checkbox">
+                            <label>
+                                @Html.HiddenFor(m => m.FilterModel.Sessions[i].Id, new { @Value = Model.FilterModel.Sessions[i].Id })
+                                @Html.CheckBoxFor(m => m.FilterModel.Sessions[i].Checked, new { @checked = Model.FilterModel.Sessions[i].Checked }) @Model.FilterModel.Sessions[i].Label
+                            </label>
+                        </div>
+                    }
+                </div>
+            </a>
+            <a id="fraction" class="list-group-item">
+                <h4 class="list-group-item-heading" style="cursor: pointer;" data-toggle="collapse" data-target="#rubricBlock" for="inputDefault">Рубрика</h4>
+                <div id="rubricBlock" class="collapse">
+                    @for (var i = 0; i < Model.FilterModel.Rubrics.Count; i++)
+                    {
+                        <div class="checkbox">
+                            <label>
+                                @Html.HiddenFor(m => m.FilterModel.Rubrics[i].Id, new { @Value = Model.FilterModel.Rubrics[i].Id })
+                                @Html.CheckBoxFor(m => m.FilterModel.Rubrics[i].Checked, new { @checked = Model.FilterModel.Rubrics[i].Checked }) @Model.FilterModel.Rubrics[i].Label
+                            </label>
+                        </div>
+                    }
+                </div>
+            </a>
+            <a id="problem" class="list-group-item">
+                <h4 class="list-group-item-heading" style="cursor: pointer;" data-toggle="collapse" data-target="#subjectBlock" for="inputDefault">Суб'єкт права законодавчої ініціативи:</h4>
+                <div id="subjectBlock" class="collapse">
+                    @for (var i = 0; i < Model.FilterModel.SubjectsOfRight.Count; i++)
+                    {
+                        <div class="checkbox">
+                            <label>
+                                @Html.HiddenFor(m => m.FilterModel.SubjectsOfRight[i].Id, new { @Value = Model.FilterModel.SubjectsOfRight[i].Id })
+                                @Html.CheckBoxFor(m => m.FilterModel.SubjectsOfRight[i].Checked, new { @checked = Model.FilterModel.SubjectsOfRight[i].Checked }) @Model.FilterModel.SubjectsOfRight[i].Label
+                            </label>
+                        </div>
+                    }
+                </div>
+            </a>
+        </div>
+    </div>
+    <div class="col-md-10 clearfix">
+        <div class="clearfix">
+            <div class="row">
+                <div class="col-xs-6 clearfix">
+                    <div id="sort" class="pull-left">Сортування: <a href="@(Model.Asc ? @Url.Action("Index", "Bills", new {asc = false}) : @Url.Action("Index", "Bills", new {asc = true}))">Дата <span class="glyphicon  @(Model.Asc ? "glyphicon-chevron-up" : "glyphicon-chevron-down")" aria-hidden="true"></span></a></div>
+                </div>
+                <div class="col-xs-6 clearfix">
+                    <div id="search-form" class="pull-right" style="width: 100%">
+                        <div class="form-group">
+                            <div class="input-group">
+                                @Html.TextBoxFor(x => x.FilterModel.Query, new { id = "search-input", @class = "form-control", placeholder = "Пошук законопроектів" })
+                                <span class="input-group-btn">
+                                    <button style="color: white;" id="search-submit" class="btn btn-default" type="button"><span class="glyphicon glyphicon-search" aria-hidden="true"></span> </button>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12"><ul class="pagination" style="margin-top: 0"></ul></div>
+                <div class="col-md-12"><p><b>Усього запитів: @Model.Count</b></p></div>
+            </div>
+        </div>
+
+        @foreach (var bill in @Model.Bills)
+        {
+            <div class="panel panel-default">
+                <div class="panel-heading clearfix">
+                    <div class="row">
+                        <div class="col-xs-6 clearfix">
+                            <div class="pull-left">
+                                <a href="@Url.Action("Bill", "Bills", new {id = bill.Id})"><b>Законопроект @bill.Number від @bill.DateRaw</b></a>
+                            </div>
+                        </div>
+                        <div class="col-xs-6 clearfix">
+                            <div class="pull-right">
+                                <span class="label label-info">@bill.Session сесія </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="panel-body">
+                    @if (@bill.Title != null)
+                    {
+                        <p><span class="glyphicon glyphicon-comment" aria-hidden="true"></span> <b>Зміст законопроекту: </b>@bill.Title</p>
+                    }
+                    @if (@bill.Rubric != null)
+                    {
+                        <p><span class="glyphicon glyphicon-list-alt" aria-hidden="true"></span> <b>Рубрика законопроекту: </b>@bill.Rubric</p>
+                    }
+                    @if (bill.Initiators != null)
+                    {
+                        <p>
+                            <span class="glyphicon glyphicon-user" aria-hidden="true"></span> <b> Ініціатор(и) законопроекту: </b>
+                            @for (var i = 0; i < bill.Initiators.Count; i++)
+                            {
+                                if (bill.Initiators[i].Id != null)
+                                {
+                                    <a href="@Url.Action("Deputy", "Home", new {deputyId = bill.Initiators[i].Id})">@bill.Initiators[i].Name</a>@(i != bill.Initiators.Count - 1 ? ", " : "")
+                                }
+                                else
+                                {
+                                    <span>@bill.Initiators[i].Name</span>@(i != bill.Initiators.Count - 1 ? ", " : "")
+                                }
+                            }
+                        </p>
+                    }
+                </div>
+            </div>
+        }
+        <ul class="pagination" id="pagination"></ul>
+    </div>
+</div>
+
+<script>
+    $(document).on("keypress", "#search-form", function (event) {
+        if (event.keyCode === 13) {
+            var host = location.protocol + '//' + location.host;
+            var query = $('#search-input').val();
+            window.location.href = host + '/bills/filter?' + filterQueryString() + "query=" + query;
+        }
+    });
+
+    function filterQueryString() {
+        var queryString = '';
+        var groups = $('#filter-form .list-group-item[id]');
+        // session
+        var checkedSessions = $(groups[0]).find('input:checked');
+        if (checkedSessions.length !== 0) {
+            checkedSessions.each(function (index) {
+                queryString += 's=' + $($(checkedSessions[index]).siblings()[0]).val() + '&';
+            });
+        }
+
+        // rubric
+        var checkedFractions = $(groups[1]).find('input:checked');
+        if (checkedFractions.length !== 0) {
+            checkedFractions.each(function (index) {
+                queryString += 'r=' + $($(checkedFractions[index]).siblings()[0]).val() + '&';
+            });
+        }
+
+        // subject
+        var checkedProblems = $(groups[2]).find('input:checked');
+        if (checkedProblems.length !== 0) {
+            checkedProblems.each(function (index) {
+                queryString += 'sor=' + $($(checkedProblems[index]).siblings()[0]).val() + '&';
+            });
+        }
+
+        return queryString;
+    }
+
+
+    $(function () {
+        var host = location.protocol + '//' + location.host;
+
+        if (window.location.href.toLowerCase().indexOf("filter") >= 0) {
+            var orderLink = $('#sort').find('a');
+            var asc = orderLink.attr('href').indexOf("True") >= 0;
+            orderLink.attr('href', host + '/bills/filter?' + filterQueryString() + 'Asc=' + asc);
+        }
+
+        $('#filter-submit').on('click',
+            function () {
+                window.location.href = host + '/bills/filter?' + filterQueryString();
+            });
+
+        $('#search-submit').on('click',
+            function () {
+                var query = $('#search-input').val();
+                window.location.href = host + '/bills/filter?' + filterQueryString() + "query=" + query;
+            });
+
+        window.pagObj = $('.pagination').twbsPagination({
+            totalPages: +'@Model.PagingModel.Total',
+            visiblePages: 5,
+            startPage: +'@Model.PagingModel.Current',
+            onPageClick: function (event, page) {
+                console.info(page + ' (from options)');
+            }
+        }).on('page', function (event, page) {
+            window.location.href = updateQueryStringParameter(window.location.href, 'page', page);
+        });
+    });
+
+    function updateQueryStringParameter(uri, key, value) {
+        var re = new RegExp("([?&])" + key + "=.*?(&|$)", "i");
+        var separator = uri.indexOf('?') !== -1 ? "&" : "?";
+        if (uri.match(re)) {
+            return uri.replace(re, '$1' + key + "=" + value + '$2');
+        }
+        else {
+            return uri + separator + key + "=" + value;
+        }
+    }
+</script>

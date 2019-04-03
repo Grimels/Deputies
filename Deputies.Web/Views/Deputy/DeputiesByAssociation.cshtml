@@ -1,0 +1,35 @@
+﻿@model Deputies.BLL.Features.Deputies.Models.DeputiesByAssociationModel
+
+<style>
+    @@media (min-width:768px) and (max-width: 991px) {
+        .row > div:nth-child(2n+3) {
+            clear: left;
+        }
+    }
+
+    @@media (min-width: 992px) and (max-width: 1199px) {
+        .row > div:nth-child(4n+5) {
+            clear: left;
+        }
+    }
+
+    @@media (min-width: 1200px) {
+        .row > div:nth-child(6n+7) {
+            clear: left;
+        }
+    }
+</style>
+
+<h1>@Model.Association.Name</h1>
+<div class="row">
+    @foreach (var deputy in @Model.Deputies)
+    {
+        <div class="col-lg-2 col-lg-2 col-sm-4 col-sm-6 text-center" style="margin-top: 20px;">
+            <a href="@Url.Action("Deputy", "Home", new {deputyId = deputy.Id})"><img class="img-responsive img-thumbnail" src="@deputy.PhotoLink" /></a>
+            <p style="margin-top: 5px;">
+                <b><a href="@Url.Action("Deputy", "Home", new {deputyId = deputy.Id})">@deputy.Name</a></b>
+            </p>
+        </div>
+    }
+</div>
+

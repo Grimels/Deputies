@@ -1,0 +1,97 @@
+﻿@model Deputies.BLL.Features.Bills.Models.BillModel
+@{
+    ViewBag.Title = "Законопроект " + Model.Number + " від " + Model.DateRaw;
+}
+
+<div class="panel panel-default" style="margin-top: 20px;">
+    <div class="panel-heading clearfix">
+        <div class="row">
+            <div class="col-xs-6 clearfix">
+                <div class="pull-left">
+                    <b>Законопроект @Model.Number від @Model.DateRaw</b>
+                </div>
+            </div>
+            <div class="col-xs-6 clearfix">
+                <div class="pull-right">
+                    <span class="label label-info">@Model.Session сесія </span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="panel-body">
+        @if (Model.Title != null)
+        {
+            <p><span class="glyphicon glyphicon-comment" aria-hidden="true"></span> <b>Зміст законопроекту: </b>@Model.Title</p>
+        }
+        @if (Model.Rubric != null)
+        {
+            <p><span class="glyphicon glyphicon-list-alt" aria-hidden="true"></span> <b>Рубрика законопроекту: </b>@Model.Rubric</p>
+        }
+        @if (Model.SubjectOfRight != null)
+        {
+            <p><span class="glyphicon glyphicon-user" aria-hidden="true"></span> <b>Суб'єкт права законодавчої ініціативи: </b>@Model.SubjectOfRight</p>
+        }
+        @if (Model.Initiators != null)
+        {
+            <p>
+                <span class="glyphicon glyphicon-user" aria-hidden="true"></span> <b> Ініціатор(и) законопроекту: </b>
+                @for (var i = 0; i < Model.Initiators.Count; i++)
+                {
+                    if (Model.Initiators[i].Id != null)
+                    {
+                        <a href="@Url.Action("Deputy", "Home", new {deputyId = Model.Initiators[i].Id})">@Model.Initiators[i].Name</a>@(i != Model.Initiators.Count - 1 ? ", " : "")
+                    }
+                    else
+                    {
+                        <span>@Model.Initiators[i].Name</span>@(i != Model.Initiators.Count - 1 ? ", " : "")
+                    }
+                }
+            </p>
+        }
+        @if (Model.MainCommittee != null)
+        {
+            <p><span class="glyphicon glyphicon-user" aria-hidden="true"></span> <b>Головний комітет: </b>@Model.MainCommittee</p>
+        }
+        @if (Model.OtherCommittees != null)
+        {
+            <p><span class="glyphicon glyphicon-user" aria-hidden="true"></span> <b>Інші комітети: </b>@string.Join(", ", Model.OtherCommittees)</p>
+        }
+        @if (Model.Texts != null)
+        {
+            <p>
+                <span class="glyphicon glyphicon-folder-open" aria-hidden="true"></span> <b>Текст законопроекту та супровідні документи:</b>
+                @for (var i = 0; i < Model.Texts.Count; i++)
+                {
+                    if (Model.Texts[i].URL != null)
+                    {
+                        <a href="@Model.Texts[i].URL">@Model.Texts[i].Title</a>@(i != Model.Texts.Count - 1 ? ", " : "")
+                    }
+                    else
+                    {
+                        <span>@Model.Texts[i].Title</span>@(i != Model.Texts.Count - 1 ? ", " : "")
+                    }
+                }
+            </p>
+        }
+        @if (Model.DocumentsRelatedToWork != null)
+        {
+            <p>
+                <span class="glyphicon glyphicon-folder-open" aria-hidden="true"></span> <b>Текст законопроекту та супровідні документи:</b>
+                @for (var i = 0; i < Model.DocumentsRelatedToWork.Count; i++)
+                {
+                    if (Model.DocumentsRelatedToWork[i].URL != null)
+                    {
+                        <a href="@Model.DocumentsRelatedToWork[i].URL">@Model.DocumentsRelatedToWork[i].Title</a>@(i != Model.DocumentsRelatedToWork.Count - 1 ? ", " : "")
+                    }
+                    else
+                    {
+                        <span>@Model.DocumentsRelatedToWork[i].Title</span>@(i != Model.DocumentsRelatedToWork.Count - 1 ? ", " : "")
+                    }
+                }
+            </p>
+        }
+        <div class="pull-right">
+            <div class="addthis_inline_share_toolbox" data-description="@Model.Title" data-url="@HttpContext.Current.Request.Url" data-title="@ViewBag.Title"></div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,88 @@
+﻿
+@{
+    ViewBag.Title = "Кiлькiсть запитiв по сесiям";
+}
+
+<script src="~/Content/Chart.bundle.min.js"></script>
+<script src="~/Content/utils.js"></script>
+<style>
+    canvas {
+        -moz-user-select: none;
+        -webkit-user-select: none;
+        -ms-user-select: none;
+    }
+</style>
+<div class="deps-buttons-wrapper">
+    <a href="@Url.Action("InquriesBySessions", "Analytics")" class="active btn btn-primary dep-header-button"><img class="btn-icon" src="~/Images/nav-icons/analitics/inquries.png"> Кiлькiсть запитiв по сесiям</a>
+    <a href="@Url.Action("Deputies", "Analytics")" class="btn btn-primary dep-header-button"><img class="btn-icon" src="~/Images/nav-icons/analitics/deputies.png"> Рейтинг депутатiв</a>
+    <a href="@Url.Action("Associations", "Analytics")" class="btn btn-primary dep-header-button"><img class="btn-icon" src="~/Images/nav-icons/analitics/fractions.png"> Рейтинг фракцiй</a>
+    <a href="@Url.Action("Problems", "Analytics")" class="btn btn-primary dep-header-button"><img class="btn-icon" src="~/Images/nav-icons/analitics/problems.png"> Проблематика запитiв</a>
+    <a href="@Url.Action("Organizations", "Analytics")" class="btn btn-primary dep-header-button"><img class="btn-icon" src="~/Images/nav-icons/analitics/organisations.png"> Органiзацiї з найбiльшою кiлькiстью звернень</a>
+</div>
+<h2>Кiлькiсть запитiв по сесiям</h2>
+<div style="margin: 20px auto;">
+    <canvas id="canvas"></canvas>
+</div>
+<script>
+        window.onload = function () {
+
+            $.get('/Analytics/InquriesBySessionsData', function (resp) {
+                var barChartData = {
+                    labels: resp.Labels,
+                    datasets: [{
+                        label: resp.Data[0].Title,
+                        backgroundColor: window.chartColors.blue,
+                        data: resp.Data[0].Data
+                    }, {
+                        label: resp.Data[1].Title,
+                        backgroundColor: window.chartColors.yellow,
+                        data: resp.Data[1].Data
+                    }]
+
+                };
+
+                var ctx = document.getElementById("canvas").getContext("2d");
+                window.myBar = new Chart(ctx, {
+                    type: 'bar',
+                    data: barChartData,
+                    options: {
+                        title: {
+                            display: true,
+                            text: "Кiлькiсть запитiв по сесiям"
+                        },
+                        tooltips: {
+                            mode: 'label',
+                            intersect: false,
+                            callbacks: {
+                                label: function (tooltipItem, data) {
+                                    var corporation = data.datasets[tooltipItem.datasetIndex].label;
+                                    var valor = data.datasets[tooltipItem.datasetIndex].data[tooltipItem.index];
+
+                                    // Loop through all datasets to get the actual total of the index
+                                    var total = 0;
+                                    for (var i = 0; i < data.datasets.length; i++)
+                                        total += data.datasets[i].data[tooltipItem.index];
+
+                                    // If it is not the last dataset, you display it as you usually do
+                                    if (tooltipItem.datasetIndex != data.datasets.length - 1) {
+                                        return corporation + " : " + valor;
+                                    } else { // .. else, you display the dataset and the total, using an array
+                                        return [corporation + " : " + valor, "Усього : " + total];
+                                    }
+                                }
+                            }
+                        },
+                        responsive: true,
+                        scales: {
+                            xAxes: [{
+                                stacked: true,
+                            }],
+                            yAxes: [{
+                                stacked: true
+                            }]
+                        }
+                    }
+                });
+            });
+        };
+</script>
