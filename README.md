@@ -1,10 +1,10 @@
 <h1>Set up development environment</h1>
 
 <ul><h3>Step 0. Install GIT</h3>
-    <li>Link for install git: <a href="https://www.atlassian.com/git/tutorials/install-git">here</a></li>
+    <li>Link for installation git: <a href="https://www.atlassian.com/git/tutorials/install-git">here</a></li>
 </ul>
 <ul><h3>Step 1. Install MongoDB <strong>v. 3.6.12</strong> and Compass (UI for using MongoDB)</h3>
-    <li>Link for install MongoDB and Compass: <a href="https://docs.mongodb.com/v3.6/tutorial/install-mongodb-on-windows/">here</a></li>
+    <li>Link for installation MongoDB and Compass: <a href="https://docs.mongodb.com/v3.6/tutorial/install-mongodb-on-windows/">here</a></li>
     <li><p>Add MongoDB to global PATH variable: </p>
         <p>This PC => Properties => Advanced system settings => Environment Variables</p>
         <p>System variables => Select => <strong>Path</strong> Textfield => Click <strong>Edit...</strong></p>
